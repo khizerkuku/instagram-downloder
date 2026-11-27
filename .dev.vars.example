@@ -1,0 +1,26 @@
+# Optional: Configure upstream API keys for higher reliability on production traffic.
+# Upload to Cloudflare with:
+#   npx wrangler secret put RAPIDAPI_KEY --name instagram-downloader
+#   npx wrangler secret put TIKTOK_RAPIDAPI_KEY --name instagram-downloader
+#   npx wrangler secret put FACEBOOK_RAPIDAPI_KEY --name instagram-downloader
+#   npx wrangler secret put SNAPCHAT_RAPIDAPI_KEY --name instagram-downloader
+
+# Instagram upstream API (optional)
+# RAPIDAPI_KEY=your_rapidapi_key_here
+# RAPIDAPI_HOST=instagram-downloader-download-instagram-videos-stories1.p.rapidapi.com
+# RAPIDAPI_ENDPOINT=https://instagram-downloader-download-instagram-videos-stories1.p.rapidapi.com/get-info-rapidapi
+
+# TikTok No-Watermark upstream API (optional)
+# TIKTOK_RAPIDAPI_KEY=your_rapidapi_key_here
+# TIKTOK_RAPIDAPI_HOST=tiktok-scraper7.p.rapidapi.com
+# TIKTOK_RAPIDAPI_ENDPOINT=https://tiktok-scraper7.p.rapidapi.com/
+
+# Facebook Videos & Reels upstream API (optional)
+# FACEBOOK_RAPIDAPI_KEY=your_rapidapi_key_here
+# FACEBOOK_RAPIDAPI_HOST=facebook-reel-and-video-downloader.p.rapidapi.com
+# FACEBOOK_RAPIDAPI_ENDPOINT=https://facebook-reel-and-video-downloader.p.rapidapi.com/app/main.php
+
+# Snapchat Spotlight & Story upstream API (optional)
+# SNAPCHAT_RAPIDAPI_KEY=your_rapidapi_key_here
+# SNAPCHAT_RAPIDAPI_HOST=snapchat-video-downloader1.p.rapidapi.com
+# SNAPCHAT_RAPIDAPI_ENDPOINT=https://snapchat-video-downloader1.p.rapidapi.com/snapchat
