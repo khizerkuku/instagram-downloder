@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Instagram Downloader — Reels, TikTok, Facebook, Snapchat &amp; Viewers</title>
+  <meta
+    name="description"
+    content="Download and view public Instagram Reels, TikTok (No Watermark), Facebook Videos, and Snapchat Spotlight &amp; Stories. Powered by Cloudflare Workers."
+  />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231d212a'/%3E%3Cpath d='M32 18v19m0 0-8-8m8 8 8-8M18 44h28' stroke='%23f3f4f6' stroke-width='4.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E" />
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem("ig_tt_theme_v1");
+        var preferred =
+          saved === "light" || saved === "dark"
+            ? saved
+            : window.matchMedia("(prefers-color-scheme: light)").matches
+              ? "light"
+              : "dark";
+        document.documentElement.setAttribute("data-theme", preferred);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="./" class="brand" aria-label="Instagram Downloader Home">
+        <span class="brand-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v12" />
+            <path d="m7 10 5 5 5-5" />
+            <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+          </svg>
+        </span>
+        <span class="brand-text">
+          <strong>Instagram Downloader</strong>
+          <small>Reels &bull; TikTok &bull; Facebook &bull; Snapchat &bull; Viewers</small>
+        </span>
+      </a>
+
+      <nav class="header-nav" aria-label="Primary Navigation">
+        <a href="#supported-resources">Resources</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#faq">FAQ</a>
+        <button
+          type="button"
+          id="themeToggleBtn"
+          class="theme-toggle"
+          aria-label="Toggle light or dark mode"
+          title="Switch Light / Dark Mode"
+        >
+          <span id="themeIcon" class="theme-icon" aria-hidden="true"></span>
+          <span id="themeLabel">Light</span>
+        </button>
+        <span class="edge-badge" title="Powered by Cloudflare Workers">
+          <span class="status-dot" id="apiStatusDot"></span>
+          <span id="apiStatusText">Cloudflare Edge</span>
+        </span>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-card" id="heroCard">
+        <div class="platform-pills" aria-label="Supported Resources Summary">
+          <span class="platform-pill pill-ig">Reels &amp; Instagram</span>
+          <span class="platform-pill pill-tt">TikTok (No Watermark)</span>
+          <span class="platform-pill pill-fb">Facebook</span>
+          <span class="platform-pill pill-snap">Snapchat</span>
+          <span class="platform-pill pill-viewer">Media Viewers</span>
+        </div>
+
+        <div class="format-tabs" role="tablist" aria-label="Select resource or viewer mode">
+          <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-kind="all">
+            Auto-Detect
+          </button>
+          <button type="button" class="tab-btn" role="tab" aria-selected="false" data-kind="reels">
+            Reels &amp; IG
+          </button>
+          <button type="button" class="tab-btn" role="tab" aria-selected="false" data-kind="tiktok">
+            TikTok (No Watermark)
+          </button>
+          <button type="button" class="tab-btn" role="tab" aria-selected="false" data-kind="facebook">
+            Facebook
+          </button>
+          <button type="button" class="tab-btn" role="tab" aria-selected="false" data-kind="snapchat">
+            Snapchat
+          </button>
+          <button type="button" class="tab-btn" role="tab" aria-selected="false" data-kind="viewer">
+            Viewers
+          </button>
+        </div>
+
+        <h1 id="heroHeading">Social Media Downloader &amp; Viewer</h1>
+        <p class="hero-subtitle" id="heroSubtitle">
+          Paste any public link from <strong>Instagram Reels</strong>, <strong>TikTok (No Watermark)</strong>, <strong>Facebook</strong>, or <strong>Snapchat</strong> to view or download in HD.
+        </p>
+
+        <form id="downloadForm" class="url-form" novalidate>
+          <div class="input-wrap">
+            <label for="mediaUrlInput" class="sr-only">Media URL</label>
+            <input
+              id="mediaUrlInput"
+              name="url"
+              type="url"
+              inputmode="url"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Paste Instagram, Reels, TikTok, Facebook, or Snapchat link..."
+              required
+            />
+            <button type="button" id="clearBtn" class="icon-btn hidden" title="Clear link" aria-label="Clear link">
+              &times;
+            </button>
+            <button type="button" id="pasteBtn" class="paste-btn" title="Paste from clipboard">
+              Paste
+            </button>
+          </div>
+          <button type="submit" id="submitBtn" class="submit-btn">
+            <span class="btn-label" id="submitLabel">Download</span>
+            <span class="spinner hidden" aria-hidden="true"></span>
+          </button>
+        </form>
+
+        <div class="hero-actions">
+          <span class="helper-hint" id="helperHint">
+            Auto-detects <code>instagram.com</code>, <code>tiktok.com</code>, <code>facebook.com</code> &amp; <code>snapchat.com</code>
+          </span>
+          <div class="demo-actions">
+            <span>Preview:</span>
+            <button type="button" class="link-btn demo-trigger" data-demo="instagram">Reels/IG</button>
+            <span aria-hidden="true">&middot;</span>
+            <button type="button" class="link-btn demo-trigger" data-demo="tiktok">TikTok</button>
+            <span aria-hidden="true">&middot;</span>
+            <button type="button" class="link-btn demo-trigger" data-demo="facebook">Facebook</button>
+            <span aria-hidden="true">&middot;</span>
+            <button type="button" class="link-btn demo-trigger" data-demo="snapchat">Snapchat</button>
+            <span aria-hidden="true">&middot;</span>
+            <button type="button" class="link-btn demo-trigger" data-demo="viewer">Viewer</button>
+          </div>
+        </div>
+
+        <div id="alertBox" class="alert hidden" role="alert"></div>
+      </div>
+    </section>
+
+    <section id="resultSection" class="container result-section hidden" aria-live="polite">
+      <div class="result-header">
+        <div>
+          <div class="result-meta">
+            <span id="resultPlatformBadge" class="kind-badge">INSTAGRAM</span>
+            <span id="resultKindBadge" class="source-badge">REEL</span>
+            <span id="resultSourceBadge" class="source-badge">Public Metadata</span>
+          </div>
+          <h2 id="resultTitle">Media Preview</h2>
+          <p id="resultAuthor" class="result-author hidden"></p>
+          <p id="resultCaption" class="result-caption"></p>
+        </div>
+        <a id="originalLink" class="outline-btn" href="#" target="_blank" rel="noopener noreferrer">
+          Open Original
+        </a>
+      </div>
+
+      <div id="mediaGrid" class="media-grid"></div>
+    </section>
+
+    <section id="historySection" class="container history-section hidden">
+      <div class="section-head">
+        <h2>Recent Links</h2>
+        <button type="button" id="clearHistoryBtn" class="link-btn">Clear History</button>
+      </div>
+      <div id="historyList" class="history-list"></div>
+    </section>
+
+    <section id="supported-resources" class="container info-section">
+      <div class="section-head">
+        <h2>Supported Resources</h2>
+        <span class="muted-note">Click any resource to switch mode</span>
+      </div>
+      <div class="resources-grid">
+        <button type="button" class="resource-card" data-select-kind="reels">
+          <div class="resource-head">
+            <strong>Reels &amp; Instagram</strong>
+            <span class="resource-tag">MP4 / JPG</span>
+          </div>
+          <p>Download public Instagram Reels, Photos, Carousels, and IGTV videos in original quality.</p>
+        </button>
+
+        <button type="button" class="resource-card" data-select-kind="tiktok">
+          <div class="resource-head">
+            <strong>TikTok Downloader</strong>
+            <span class="resource-tag">No Watermark</span>
+          </div>
+          <p>Save public TikTok videos without watermark in HD MP4 plus original MP3 audio.</p>
+        </button>
+
+        <button type="button" class="resource-card" data-select-kind="facebook">
+          <div class="resource-head">
+            <strong>Facebook Downloader</strong>
+            <span class="resource-tag">Watch / Reels</span>
+          </div>
+          <p>Extract and save public Facebook Videos, Reels, and <code>fb.watch</code> links in HD/SD.</p>
+        </button>
+
+        <button type="button" class="resource-card" data-select-kind="snapchat">
+          <div class="resource-head">
+            <strong>Snapchat Downloader</strong>
+            <span class="resource-tag">Spotlight / Story</span>
+          </div>
+          <p>Fetch public Snapchat Spotlight clips, shared snaps, and public creator stories.</p>
+        </button>
+
+        <button type="button" class="resource-card" data-select-kind="viewer">
+          <div class="resource-head">
+            <strong>Public Media Viewers</strong>
+            <span class="resource-tag">In-Browser View</span>
+          </div>
+          <p>Inspect and watch public posts, reels, stories, titles, and captions inline before saving.</p>
+        </button>
+      </div>
+    </section>
+
+    <section id="how-it-works" class="container info-section">
+      <h2>How It Works</h2>
+      <div class="steps-grid">
+        <article class="step-card">
+          <span class="step-num">1</span>
+          <h3>Copy Any Public Link</h3>
+          <p>Copy a public URL from Instagram Reels, TikTok, Facebook Watch/Reels, or Snapchat Spotlight.</p>
+        </article>
+        <article class="step-card">
+          <span class="step-num">2</span>
+          <h3>Choose Download or Viewer</h3>
+          <p>Paste the link above. Use <strong>Auto-Detect</strong> to download or switch to <strong>Viewers</strong> to preview media and metadata inline.</p>
+        </article>
+        <article class="step-card">
+          <span class="step-num">3</span>
+          <h3>Preview &amp; Save</h3>
+          <p>Watch directly in your browser or stream the video, photo, or MP3 file cleanly through Cloudflare Workers.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="faq" class="container info-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-list">
+        <details open>
+          <summary>Which platforms and formats are supported?</summary>
+          <p>Instagram (Reels, Posts, Carousels, IGTV), TikTok (Without Watermark + MP3), Facebook (Videos, Reels, <code>fb.watch</code>), Snapchat (Spotlight &amp; public Stories), and an inline Public Media Viewer mode.</p>
+        </details>
+        <details>
+          <summary>How does the Viewers option work?</summary>
+          <p>Selecting <strong>Viewers</strong> resolves the public link so you can watch the video, inspect thumbnails, creator handle, and caption right inside the page without immediately triggering a file download.</p>
+        </details>
+        <details>
+          <summary>Are private accounts supported?</summary>
+          <p>No. Only publicly accessible links are supported, and optional Worker API secrets (<code>RAPIDAPI_KEY</code>, <code>TIKTOK_RAPIDAPI_KEY</code>, <code>FACEBOOK_RAPIDAPI_KEY</code>, <code>SNAPCHAT_RAPIDAPI_KEY</code>) can be configured for reliable production traffic.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p><strong>Instagram Downloader</strong> &mdash; Reels, TikTok (No Watermark), Facebook, Snapchat &amp; Viewers on Cloudflare Workers.</p>
+      <p class="disclaimer">Disclaimer: Only view or download public content you own or have permission to access. Not affiliated with Meta, TikTok, or Snap.</p>
+    </div>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
