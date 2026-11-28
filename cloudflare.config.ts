@@ -10,7 +10,6 @@ export default defineConfig({
       enabled: true,
     },
     assets: {
-      binding: "ASSETS",
       htmlHandling: "auto-trailing-slash",
       notFoundHandling: "single-page-application",
       runWorkerFirst: ["/api/*"],
